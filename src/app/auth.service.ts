@@ -6,12 +6,14 @@ import { ActivatedRoute } from '@angular/router';
 import { AppUser } from './models/app-user';
 import { UserService } from './user.service';
 import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/observable/of';
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class AuthService {
-  user$: Observable<firebase.User>;
+  user$: Observable<firebase.User>; 
   constructor(
     private userService: UserService,
     private afAuth: AngularFireAuth, 
@@ -35,6 +37,13 @@ export class AuthService {
 
   get appUser$ (): Observable<AppUser>
   {
-    return this.user$.switchMap(user => this.userService.get(user.uid))
+    // return this.user$.switchMap(user => this.userService.get(user.uid))
+
+    return this.user$
+    .switchMap(user => {
+      if(user) return this.userService.get(user.uid);
+
+      return Observable.of(null);
+    })
   }
 }
